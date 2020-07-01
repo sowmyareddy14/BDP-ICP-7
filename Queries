@@ -1,72 +1,65 @@
-1) Created Keyspaces "icp7"
+Commands to start cassandra shell :
 
-cqlsh> create keyspace icp7 with replication={'class':'SimpleStrategy', 'replication_factor':1};
+cassandra.bat -f
 
-2) See the list of Keyspaces
+cqlsh
 
-cqlsh> DESC KEYSPACES;
+Created Keyspace - test1 :
 
-3) Switch the keyspace
+cqlsh> create keyspace test1 with replication={'class':'SimpleStrategy', 'replication_factor':1};
 
-cqlsh> USE icp7;
+Switch to the created keyspace :
 
-4) Creating table Employees
+cqlsh> USE test1;
 
-cqlsh> create table icp7.employees (employee_id int, department text, lastname text, years_with_company int, hiredate date, jobtitle text, salary int, managerid int, primary key(employee_id));
+Created table Employees :
 
-5) Copying data into table
+create table test1.employees (employee_id int, department text, lastname text, years_with_company int, hiredate date, jobtitle text, salary int, managerid int, primary key(employee_id));
 
-cqlsh:icp7> copy employees (employee_id,department,lastname,years_with_company,hiredate,jobtitle,salary,managerid) from 'E:\UMKC\Summer Sem\BDP\ICP7\employee_entries.csv' with delimiter='|' and HEADER=true;
+Copying data into table :
 
+copy employees (employee_id,department,lastname,years_with_company,hiredate,jobtitle,salary,managerid) from 'E:\UMKC\Summer Sem\BDP\ICP7\employee_entries.csv' with delimiter='|' and HEADER=true;
+Created Keyspace - test1
 
-6) Query-1:
+Queries :
 
-cqlsh:icp7> select employee_id, lastname, jobtitle, hiredate from employees;
+(1) select employee_id, lastname, jobtitle, hiredate from employees;
 
-7) Query-2:
+(2) select lastname, salary from employees where jobtitle='clerk' allow filtering;
 
-cqlsh:icp7> select lastname, salary from employees where jobtitle='clerk' allow filtering;
+(3) select lastname, jobtitle, salary from employees where hiredate = '2000-02-18' allow filtering;
 
-8) Query-3:
+(4) CREATE FUNCTION IF NOT EXISTS calculateAnnual (input int) CALLED ON NULL INPUT RETURNS int LANGUAGE java AS 'return Integer.valueOf(input.intValue() * 12)';
 
-cqlsh:icp7> select lastname, jobtitle, salary from employees where hiredate = '2000-02-18' allow filtering;
+select lastname, calculateAnnual(salary) as AnnualSalary from employees;
 
-9) Query-4:
+(5) select lastname, salary, managerid from employees where salary = 45000 allow filtering;
 
-
-CREATE FUNCTION IF NOT EXISTS calculateAnnual (input int) CALLED ON NULL INPUT RETURNS int LANGUAGE java AS 'return Integer.valueOf(input.intValue() * 12)';
-
-cqlsh:icp7> select lastname, calculateAnnual(salary) as AnnualSalary from employees;
-
-10) Query-5:
-
-cqlsh:icp7> select lastname, salary, managerid from employees where salary = 45000 allow filtering;
 
 
 Bonus
 
 ================
 
-Query 1:
 
-cqlsh:icp7> create function if not exists convertName (name text) called on null input returns text language java as 'return name.substring(0, 1).toUpperCase() + name.substring(1);';
+(1) 
+create function if not exists convertName (name text) called on null input returns text language java as 'return name.substring(0, 1).toUpperCase() + name.substring(1);';
 
-cqlsh:icp7> CREATE CUSTOM INDEX lastname_prefix_idx ON employees (lastname) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode': 'PREFIX', 'analyzer_class': 'org.apache.cassandra.index.sasi.analyzer.StandardAnalyzer', 'case_sensitive': 'false'};
+CREATE CUSTOM INDEX lastname_prefix_idx ON employees (lastname) USING 'org.apache.cassandra.index.sasi.SASIIndex' WITH OPTIONS = {'mode': 'PREFIX', 'analyzer_class': 'org.apache.cassandra.index.sasi.analyzer.StandardAnalyzer', 'case_sensitive': 'false'};
 
-cqlsh:icp7> select convertName(lastname) from employees;
-
-
-CREATE FUNCTION IF NOT EXISTS len (name text) CALLED ON NULL INPUT RETURNS int LANGUAGE java AS 'return name.length();';
+select convertName(lastname) from employees;
 
 
-Query 2:
+2) Creating books table and copying data into the table
 
 create table icp7.books (book_id int, category text, title text, author text, publisher text, pub_date date, number_pages int, primary key(book_id));
 
 copy books (book_id, category, title, author, publisher, pub_date, number_pages) from 'E:\UMKC\Summer Sem\BDP\ICP7\book_entries.csv' with delimiter='|' and HEADER=true;
 
-cqlsh:icp7> select * from books;
+Executed Queries as follow
 
-cqlsh:icp7> select * from books where pub_date > '2013-08-10' and pub_date < '2014-09-30' allow filtering;
+select * from books;
 
-cqlsh:icp7> select * from books where number_pages > 500 allow filtering;
+select * from books where pub_date > '2013-08-10' and pub_date < '2014-09-30' allow filtering;
+
+select * from books where number_pages > 500 allow filtering;
